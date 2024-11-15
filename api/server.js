@@ -1,9 +1,25 @@
 const express = require('express');
-const server = express();
+const projectsRouter = require('./projects/projects-router');
+const actionsRouter = require('./actions/actions-router');
+const { logger } = require('./projects/projects-middleware'); // Ensure logger is a function
+require('dotenv').config(); // Load environment variables from a .env file
 
-// Configure your server here
-// Build your actions router in /api/actions/actions-router.js
-// Build your projects router in /api/projects/projects-router.js
-// Do NOT `server.listen()` inside this file!
+const app = express();
 
-module.exports = server;
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Custom logger middleware
+app.use(logger);
+
+// API routes
+app.use('/api/projects', projectsRouter);
+app.use('/api/actions', actionsRouter);
+
+// Default route for unmatched paths
+app.use((req, res) => {
+    res.status(404).json({ message: 'Route not found' });
+});
+
+// Export the app to be used in other files, like server.js
+module.exports = app;
